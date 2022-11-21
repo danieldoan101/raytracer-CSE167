@@ -37,9 +37,6 @@ void Scene::draw(void){
     // HW3: The depth-first search for the node traversal has already been implemented (cur, dfs_stack).
     // HW3: All you have to do is to also update the states of (cur_VM, matrix_stack) alongside the traversal.  You will only need to modify starting from this line.
     dfs_stack.push(cur);
-    /**
-     * TODO: (HW3 hint: you should do something here)
-     */
     matrix_stack.push(cur_VM);
     
     // Compute total number of connectivities in the graph; this would be an upper bound for
@@ -60,19 +57,12 @@ void Scene::draw(void){
         
         // top-pop the stacks
         cur = dfs_stack.top();  dfs_stack.pop();
-        /**
-         * TODO: (HW3 hint: you should do something here)
-         */
         cur_VM = matrix_stack.top();  matrix_stack.pop();
         
         // draw all the models at the current node
         for ( size_t i = 0; i < cur -> models.size(); i++ ){
             // Prepare to draw the geometry. Assign the modelview and the material.
             
-            /**
-             * TODO: (HW3 hint: you should do something here)
-             */
-
             shader -> modelview = cur_VM * cur -> modeltransforms[i]; // TODO: HW3: Without updating cur_VM, modelview would just be camera's view matrix.
             shader -> material  = ( cur -> models[i] ) -> material;
             
@@ -84,9 +74,6 @@ void Scene::draw(void){
         // Continue the DFS: put all the child nodes of the current node in the stack
         for ( size_t i = 0; i < cur -> childnodes.size(); i++ ){
             dfs_stack.push( cur -> childnodes[i] );
-            /**
-             * TODO: (HW3 hint: you should do something here)
-             */
             matrix_stack.push(cur_VM * cur -> childtransforms[i]);
         }
         

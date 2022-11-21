@@ -14,6 +14,7 @@
 #include <glm/glm.hpp>
 #include "Screenshot.h"
 #include "Scene.h"
+#include "Image.h"
 
 
 static const int width = 800;
@@ -21,6 +22,7 @@ static const int height = 600;
 static const char* title = "Scene viewer";
 static const glm::vec4 background(0.1f, 0.2f, 0.3f, 1.0f);
 static Scene scene;
+static Image image(width, height);
 
 #include "hw3AutoScreenshots.h"
 
@@ -46,7 +48,8 @@ void initialize(void){
     glViewport(0,0,width,height);
     
     // Initialize scene
-    scene.init();
+    //scene.init();
+    image.init();
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
@@ -55,7 +58,8 @@ void initialize(void){
 void display(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-    scene.draw();
+    //scene.draw();
+    image.draw();
     
     glutSwapBuffers();
     glFlush();
@@ -79,6 +83,12 @@ void keyboard(unsigned char key, int x, int y){
             break;
         case 'o': // save screenshot
             saveScreenShot();
+            break;
+        case 'i':
+            for(int i=0; i<image.pixels.size(); i++){
+                image.pixels[i]=glm::vec3(0,1,0);
+            }
+            glutPostRedisplay();
             break;
         case 'r':
             scene.camera -> aspect_default = float(glutGet(GLUT_WINDOW_WIDTH))/float(glutGet(GLUT_WINDOW_HEIGHT));
