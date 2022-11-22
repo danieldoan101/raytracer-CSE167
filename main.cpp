@@ -23,6 +23,7 @@ static const char* title = "Scene viewer";
 static const glm::vec4 background(0.1f, 0.2f, 0.3f, 1.0f);
 static Scene scene;
 static Image image(width, height);
+static bool rayTraceMode = false;
 
 #include "hw3AutoScreenshots.h"
 
@@ -36,6 +37,7 @@ void printHelp(){
       press 'A'/'Z' to zoom.
       press 'R' to reset camera.
       press 'L' to turn on/off the lighting.
+      press 'I' to turn on/off raytracing mode.
     
       press Spacebar to generate images for hw3 submission.
     
@@ -48,8 +50,11 @@ void initialize(void){
     glViewport(0,0,width,height);
     
     // Initialize scene
-    //scene.init();
+    scene.init();
     image.init();
+    for(int i=0; i<image.pixels.size(); i++){
+        image.pixels[i]=glm::vec3(0,1,0);
+    }
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
@@ -58,9 +63,12 @@ void initialize(void){
 void display(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-    //scene.draw();
-    image.draw();
-    
+    if(rayTraceMode) {
+        image.draw();
+    } else {
+        scene.draw();
+    }
+
     glutSwapBuffers();
     glFlush();
     
@@ -85,9 +93,7 @@ void keyboard(unsigned char key, int x, int y){
             saveScreenShot();
             break;
         case 'i':
-            for(int i=0; i<image.pixels.size(); i++){
-                image.pixels[i]=glm::vec3(0,1,0);
-            }
+            rayTraceMode = !rayTraceMode;
             glutPostRedisplay();
             break;
         case 'r':
