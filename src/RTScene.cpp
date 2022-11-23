@@ -26,11 +26,11 @@ void RTScene::buildTriangleSoup(void){
     }
     
     // Define stacks for depth-first search (DFS)
-    std::stack < Node* > dfs_stack;
+    std::stack < RTNode* > dfs_stack;
     std::stack < mat4 >  matrix_stack; // HW3: You will update this matrix_stack during the depth-first search while loop.
     
     // Initialize the current state variable for DFS
-    Node* cur = node["world"]; // root of the tree
+    RTNode* cur = node["world"]; // root of the tree
     mat4 cur_VM = camera -> view; // HW3: You will update this current modelview during the depth first search.  Initially, we are at the "world" node, whose modelview matrix is just camera's view matrix.
     
     dfs_stack.push(cur);
@@ -60,12 +60,27 @@ void RTScene::buildTriangleSoup(void){
         for ( size_t i = 0; i < cur -> models.size(); i++ ){
             // Prepare to draw the geometry. Assign the modelview and the material.
             
-            //shader -> modelview = cur_VM * cur -> modeltransforms[i];
-            //shader -> material  = ( cur -> models[i] ) -> material;
+            
+            glm::mat4 curModelView = cur_VM * cur->modeltransforms[i];
+            glm::mat3 curModelView3 = mat3(curModelView);
+            Material* curMaterial = cur->models[i]->material;
             
             // The draw command
-            shader -> setUniforms();
-            ( cur -> models[i] ) -> geometry -> draw();
+            //shader -> setUniforms();
+            //( cur -> models[i] ) -> geometry -> draw();
+            int numTriangles = cur->models[i]->geometry->count;
+            for(int j=0; j<numTriangles; j++){
+                Triangle origTri = cur->models[i]->geometry->elements[j];
+                Triangle transformedTri;
+                transformedTri.P[0] = origTri.P[0]*curModelView3;
+                transformedTri.P[1] = origTri.P[1]*curModelView3;
+                transformedTri.P[2] = origTri.P[2]*curModelView3;
+                transformedTri.N[0] = origTri.N[0]*curModelView3;
+                transformedTri.N[1] = origTri.N[1]*curModelView3;
+                transformedTri.N[2] = origTri.N[2]*curModelView3;
+                transformedTri.material = curMaterial;
+                triangle_soup.push_back(transformedTri);
+            }
         }
         
         // Continue the DFS: put all the child nodes of the current node in the stack
