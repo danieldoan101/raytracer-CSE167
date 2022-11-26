@@ -74,12 +74,12 @@ void RTScene::init(void){
     light["bulb"] -> color = 1.5f * vec4(1.0f,0.2f,0.1f,1.0f);
     
     // Build the scene graph
-    node["table"] = new Node;
-    node["table top"] = new Node;
-    node["table leg"] = new Node;
-    node["teapot1"] = new Node;
-    node["teapot2"] = new Node;
-    node["bunny"] = new Node;
+    node["table"] = new RTNode;
+    node["table top"] = new RTNode;
+    node["table leg"] = new RTNode;
+    node["teapot1"] = new RTNode;
+    node["teapot2"] = new RTNode;
+    node["bunny"] = new RTNode;
     
     
     node["table"] -> childnodes.push_back( node["table top"] );
@@ -126,9 +126,11 @@ void RTScene::init(void){
     camera -> reset();
     
     // Initialize shader
+    /*
     shader = new SurfaceShader;
     shader -> read_source( "shaders/projective.vert", "shaders/lighting.frag" );
     shader -> compile();
     glUseProgram(shader -> program);
     shader -> initUniforms();
+    */
 }

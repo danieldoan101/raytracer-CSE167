@@ -19,6 +19,8 @@
 #include <GL/glut.h>
 #endif
 
+#ifndef __IMAGE_H__
+#define __IMAGE_H__
 class Image {
 public:
     int width;
@@ -50,3 +52,4 @@ public:
                 GL_NEAREST); // copy framebuffer from read to write
     }
 };
+#endif
