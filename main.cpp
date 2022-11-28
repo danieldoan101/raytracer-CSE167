@@ -54,6 +54,9 @@ void initialize(void){
     // Initialize scene
     scene.init();
     image.init();
+    for(int i=0; i<image.pixels.size(); i++){
+        image.pixels[i]=glm::vec3(0,1,0);
+    }
     rtscene.init();
     rtscene.buildTriangleSoup();
     RayTracer::Raytrace(*(rtscene.camera), rtscene, image);

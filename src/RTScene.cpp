@@ -62,6 +62,13 @@ void RTScene::buildTriangleSoup(void){
             Material* curMaterial = cur->models[i]->material;
 
             /*
+            std::cout << curMaterial->emision.x << "," << curMaterial->ambient.x << "," << curMaterial->diffuse.x << "," << curMaterial->specular.x << "," << "\n";
+            std::cout << curMaterial->emision.y << "," << curMaterial->ambient.y << "," << curMaterial->diffuse.y << "," << curMaterial->specular.y << "," << "\n";
+            std::cout << curMaterial->emision.z << "," << curMaterial->ambient.z << "," << curMaterial->diffuse.z << "," << curMaterial->specular.z << "," << "\n";
+            std::cout << curMaterial->emision.w << "," << curMaterial->ambient.w << "," << curMaterial->diffuse.w << "," << curMaterial->specular.w << "," << "\n";
+            std::cout << curMaterial->shininess << "\n";
+            */
+            /*
             std::cout << curModelView[0][0] << "," << curModelView[1][0] << "," << curModelView[2][0] << "," << curModelView[3][0] << "\n";
             std::cout << curModelView[0][1] << "," << curModelView[1][1] << "," << curModelView[2][1] << "," << curModelView[3][1] << "\n";
             std::cout << curModelView[0][2] << "," << curModelView[1][2] << "," << curModelView[2][2] << "," << curModelView[3][2] << "\n";
@@ -80,19 +87,6 @@ void RTScene::buildTriangleSoup(void){
                 transformedTri.P.push_back(glm::vec3(currProd.x,currProd.y,currProd.z));
                 currProd = curModelView * glm::vec4(origTri.P[2],1);
                 transformedTri.P.push_back(glm::vec3(currProd.x,currProd.y,currProd.z));
-                /*
-                glm::vec3 currProdN = origTri.N[0]*invTransMV;
-                transformedTri.N.push_back(currProdN);
-                currProdN = origTri.N[1]*invTransMV;
-                transformedTri.N.push_back(currProdN);
-                currProdN = origTri.N[2]*invTransMV;
-                transformedTri.N.push_back(currProdN);
-                */
-                /*
-                transformedTri.P.push_back(origTri.P[0]*curModelView3);
-                transformedTri.P.push_back(origTri.P[1]*curModelView3);
-                transformedTri.P.push_back(origTri.P[2]*curModelView3);
-                */
                 transformedTri.N.push_back(invTransMV*origTri.N[0]);
                 transformedTri.N.push_back(invTransMV*origTri.N[1]);
                 transformedTri.N.push_back(invTransMV*origTri.N[2]);
