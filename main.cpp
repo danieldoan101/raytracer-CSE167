@@ -18,8 +18,8 @@
 #include "RayTracer.h"
 
 
-static const int width = 100; //800 -> 100
-static const int height = 75; //600 -> 75
+static const int width = 800;
+static const int height = 600;
 static const char* title = "Scene viewer";
 static const glm::vec4 background(0.1f, 0.2f, 0.3f, 1.0f);
 static Scene scene;
@@ -54,10 +54,10 @@ void initialize(void){
     // Initialize scene
     scene.init();
     image.init();
-    for(int i=0; i<image.pixels.size(); i++){
-        image.pixels[i]=glm::vec3(0,1,0);
-    }
     rtscene.init();
+    rtscene.camera -> zoom(0.3f);
+    rtscene.camera -> rotateRight(20);
+    rtscene.camera -> rotateUp(10);
     rtscene.buildTriangleSoup();
     RayTracer::Raytrace(*(rtscene.camera), rtscene, image);
 

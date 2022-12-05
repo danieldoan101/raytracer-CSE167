@@ -4,12 +4,12 @@ using namespace RayTracer;
 
 void RayTracer::Raytrace(Camera cam, RTScene scene, Image &image) {
     int w = image.width; int h = image.height;
-    for (int j=21; j<h-35; j++){
-        for (int i=0; i<w; i++){
-            std::cout << i << "," << j << "\n";
+    for (int j=0; j<h; j++){ 
+        for (int i=0; i<w; i++){ 
+            //std::cout << i << "," << j << "\n";
             Ray ray = RayThruPixel(cam, i, j, w, h);
             Intersection hit = Intersect(ray, &scene);
-            image.pixels[i+j*w] = FindColor(hit, 1, &scene);
+            image.pixels[i+j*w] = FindColor(hit, 3, &scene);
         }
     }
 }
@@ -75,9 +75,8 @@ Intersection RayTracer::Intersect(Ray ray, RTScene* sceneptr) {
 
 glm::vec3 RayTracer::FindColor(Intersection hit, int recursion_depth, RTScene* sceneptr) {
     glm::vec4 color;
-    Material* m = hit.triangle->material;
+    Material* m;
     
-
     std::map<std::string, Light* > light = sceneptr -> light;
     int nlights = light.size();
     std::vector<glm::vec4> lightpositions;
@@ -89,62 +88,64 @@ glm::vec3 RayTracer::FindColor(Intersection hit, int recursion_depth, RTScene* s
     if(hit.dist == INFINITY) {
         color = glm::vec4(0);
     } else {
+        m = hit.triangle->material;
         color = m -> emision;
-
-        /*        
-        std::cout << m->emision.x << "," << m->ambient.x << "," << m->diffuse.x << "," << m->specular.x << "," << "\n";
-        std::cout << m->emision.y << "," << m->ambient.y << "," << m->diffuse.y << "," << m->specular.y << "," << "\n";
-        std::cout << m->emision.z << "," << m->ambient.z << "," << m->diffuse.z << "," << m->specular.z << "," << "\n";
-        std::cout << m->emision.w << "," << m->ambient.w << "," << m->diffuse.w << "," << m->specular.w << "," << "\n";
-        std::cout << m->shininess << "\n";
-        */
+        int visibility;
+        glm::vec3 specularComp;
         
+        glm::vec3 curLight;
+        glm::vec4 lightPos;
+        glm::vec3 dirLight;
+        glm::vec3 diffuseComp;
+        glm::vec3 dirView;
+        glm::vec3 halfwayDir;
+        Ray toLight;
+        Intersection checkShadow;
         for(int i=0; i<nlights; i++) {
             // ambient component
-            glm::vec3 curLight = glm::vec3(m->ambient);
+            curLight = glm::vec3(m->ambient);
+
             // diffuse component
-            glm::vec4 lightPos = lightpositions[i];
-            glm::vec3 dirLight = glm::normalize(glm::vec3(lightPos)-lightPos.w*hit.N);
-            glm::vec3 diffuseComp = glm::vec3(m->diffuse)*glm::max(glm::dot(hit.N,dirLight),(float)0);
-            // specular component
-            glm::vec3 dirView = glm::normalize(-hit.P);
-            glm::vec3 halfwayDir = normalize(dirLight+dirView);
-            glm::vec3 specularComp = glm::vec3(m->specular)*glm::pow(glm::max(glm::dot(hit.N,halfwayDir),(float)0),m->shininess);
-            curLight = curLight + diffuseComp + specularComp;
-            curLight.x = curLight.x*lightcolors[i].x;
-            curLight.y = curLight.y*lightcolors[i].y;
-            curLight.z = curLight.z*lightcolors[i].z;
+            lightPos = lightpositions[i];
+            dirLight = glm::normalize(glm::vec3(lightPos)-lightPos.w*hit.N);
+            diffuseComp = glm::vec3(m->diffuse)*glm::max(glm::dot(hit.N,dirLight),(float)0);
+            curLight = curLight + diffuseComp;
+
+            // specular component at maximum recursion
+            if(recursion_depth == 0) {
+                dirView = glm::normalize(-hit.N);
+                halfwayDir = normalize(dirLight+dirView);
+                specularComp = glm::vec3(m->specular)*glm::pow(glm::max(glm::dot(hit.N,halfwayDir),(float)0),m->shininess);
+                curLight = curLight + specularComp;
+            }
+
+            //check for shadow
+            toLight.p0 = hit.P + 0.2f*dirLight;
+            toLight.dir = dirLight;
+            float distToLight = glm::sqrt(glm::pow((lightPos.x-hit.P.x),2) +
+                                        glm::pow((lightPos.y-hit.P.y),2) +
+                                        glm::pow((lightPos.z-hit.P.z),2));
+            checkShadow = Intersect(toLight, sceneptr);
+            visibility = 1;
+            if(checkShadow.dist < distToLight) {
+                visibility = 0;
+            }
+            curLight.x = visibility * curLight.x * lightcolors[i].x;
+            curLight.y = visibility * curLight.y * lightcolors[i].y;
+            curLight.z = visibility * curLight.z * lightcolors[i].z;
             color = color + glm::vec4(curLight,0);
         }
+        
+        Ray newRay;
+        Intersection hit2;
+        // specular component (recursive)
+        if(recursion_depth > 0) {
+            newRay.dir = 2.0f*glm::dot(hit.N,hit.V)*hit.N-hit.V;
+            newRay.p0 = hit.P + 0.1f* newRay.dir;
+            hit2 = Intersect(newRay, sceneptr);
+            specularComp = FindColor(hit2,recursion_depth-1,sceneptr);
+            color = color + glm::vec4(specularComp,0);
+        }
     }
-    /*
-0,0.1,0.2,0.9,
-0,0.1,0.2,0.9,
-0,0.1,0.2,0.9,
-1,1,1,1,
-50
-
-
-    fragColor = emision;
-    vec4 eyeNormal = vec4(normalize(inverse(transpose(mat3(modelview)))*normal),1);
-    vec4 eyePosition = modelview*position;
-    for(int i=0; i<nlights; i++){
-        // ambient component
-        vec3 curLight = ambient.xyz;
-        // diffuse component
-        vec4 lightPos = view*lightpositions[i];
-        vec3 dirLight = normalize(eyeNormal.w*lightPos.xyz-lightPos.w*eyeNormal.xyz);
-        vec3 diffuseComp = diffuse.xyz*max(dot(eyeNormal.xyz,dirLight),0);
-        // specular component
-        vec3 dirView = normalize(-eyePosition.xyz/eyePosition.w);
-        vec3 halfwayDir = normalize(dirLight+dirView);
-        vec3 specularComp = specular.xyz*pow(max(dot(eyeNormal.xyz,halfwayDir),0),shininess);
-        curLight = curLight + diffuseComp + specularComp;
-        curLight.x = curLight.x*lightcolors[i].x;
-        curLight.y = curLight.y*lightcolors[i].y;
-        curLight.z = curLight.z*lightcolors[i].z;
-        fragColor = fragColor + vec4(curLight,0);
-    }
-    */
     return color;
 }
